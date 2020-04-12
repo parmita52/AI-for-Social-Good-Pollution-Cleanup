@@ -1,7 +1,7 @@
 # this is for testing PuLP for Linear Programming
 import pulp
 
-# example LP jus tto see it in action
+# example LP just to see it in action
 '''
 x ≥ 0
 y ≥ 2
