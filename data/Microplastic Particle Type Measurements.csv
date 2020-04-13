@@ -1,4 +1,4 @@
-studyName,"Event Index","Event Number","Datetime PST","Latitude (º)","Longitude (º)",Net,"Mesh Size (?)",Name,"Particle Mass (g)","Missing Value Expl. (Particle Mass)",Color,"Particle Type","Plastic Type"
+studyName,"Event Index","Event Number","Datetime PST","Latitude","Longitude",Net,"Mesh Size (?)",Name,"Particle Mass (g)","Missing Value Expl. (Particle Mass)",Color,"Particle Type","Plastic Type"
 SEAPLEX-0908NH,G1.5,281,"2009-08-12 20:59:00",35.9864,-139.8749,manta,333,G1.5.75.A11,0.0007,,black,fragment,HDPE
 SEAPLEX-0908NH,G1.5,281,"2009-08-12 20:59:00",35.9864,-139.8749,manta,333,G1.5.75.A12,0.0016,,white,fragment,HDPE
 SEAPLEX-0908NH,G1.5,281,"2009-08-12 20:59:00",35.9864,-139.8749,manta,333,G1.5.75.A3,0.0109,,black,fragment,HDPE

@@ -27,9 +27,9 @@ import matplotlib.pyplot as plt
 # plt.show()
 
 df = pd.read_csv(
-    'data/OneSharedOcean/oo_surface_debris_malaspina.csv', sep=";")
+    'data/Microplastic Particle Type Measurements.csv', sep=",")
 
-df.columns = ['Latitude', 'Longitude', 'Plastic', 'Vessel']
+# df.columns = ['Latitude', 'Longitude', 'Plastic', 'Vessel']
 
 # Plastic concentration in pieces per km^2
 print(df)
