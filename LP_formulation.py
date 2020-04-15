@@ -36,9 +36,7 @@ class Beach:
 
 # Global variables
 # rate of cleanup (average grams of plastic picked up per hour, by one volunteer)
-r = 50
-# hours spent on a cleanup
-h = 2
+r = 12305.56
 # minimum number of volunteers at a beach
 min_x = 2
 total_volunteers = 10  # total number of volunteers who have signed up
@@ -53,8 +51,16 @@ lp_problem = pulp.LpProblem(
 # load data into dataframe
 df = pd.read_csv('data/test.csv', sep=",")
 
+normalized_df = df.copy()
+for feature_name in df.columns:
+    if feature_name != NAME:
+        max_value = df[feature_name].max()
+        min_value = df[feature_name].min()
+        normalized_df[feature_name] = (
+            df[feature_name] - min_value) / (max_value - min_value + 0.0001)
+
 # each entry in dataframe
-for index, b in df.iterrows():
+for index, b in normalized_df.iterrows():
     # create a beach object
     beach_obj = Beach(b[NAME], b[G], b[W], b[S], b[P])
     # add it to the dictionary
@@ -69,13 +75,14 @@ num_beaches = len(beach_dict)
 
 # Objective function
 # weights
-cv = 5  # pollution cleaned
-cw = 3  # wildlife
-cs = 1  # safety
-cp = 0.5  # population
+cv = 0.50  # pollution cleaned
+cw = 0.30  # wildlife
+cs = 0.10  # safety
+cp = 0.10  # population
 
 lp_problem += pulp.lpSum(
-    (cv*r*beach_volunteers[i]*h*beach_dict[i].get_w()  # cv*r*v_i*h_i
+    (cv*r*beach_volunteers[i]    # cv*r*v_i
+     + cw*beach_dict[i].get_w()  # cw*w_i
      + cs*beach_dict[i].get_s()  # cs*s_i
      + cp*beach_dict[i].get_p()  # cp*p_i
      )
@@ -84,8 +91,7 @@ lp_problem += pulp.lpSum(
 # Constraints
 for i in range(num_beaches):
         # r*v_i*h_i <= g_i
-    lp_problem += r*beach_volunteers[i] * \
-        h <= beach_dict[i].get_g()
+    lp_problem += r*beach_volunteers[i] <= beach_dict[i].get_g()
     lp_problem += pulp.lpSum(beach_volunteers[i]
                              for i in range(num_beaches)) <= total_volunteers
 
