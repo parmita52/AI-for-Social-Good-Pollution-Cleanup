@@ -56,8 +56,9 @@ for feature_name in df.columns:
     if feature_name != NAME:
         max_value = df[feature_name].max()
         min_value = df[feature_name].min()
-        normalized_df[feature_name] = (
-            df[feature_name] - min_value) / (max_value - min_value + 0.0001)
+        normalized_df[feature_name] = (df[feature_name])/(max_value)
+
+r = r/(df[G].max())
 
 # each entry in dataframe
 for index, b in normalized_df.iterrows():
@@ -75,10 +76,10 @@ num_beaches = len(beach_dict)
 
 # Objective function
 # weights
-cv = 0.50  # pollution cleaned
-cw = 0.30  # wildlife
+cv = 0.10  # pollution cleaned
+cw = 0.10  # wildlife
 cs = 0.10  # safety
-cp = 0.10  # population
+cp = 0.70  # population
 
 lp_problem += pulp.lpSum(
     (cv*r*beach_volunteers[i]    # cv*r*v_i
@@ -90,10 +91,11 @@ lp_problem += pulp.lpSum(
 
 # Constraints
 for i in range(num_beaches):
-        # r*v_i*h_i <= g_i
+    # r*v_i <= g_i
     lp_problem += r*beach_volunteers[i] <= beach_dict[i].get_g()
-    lp_problem += pulp.lpSum(beach_volunteers[i]
-                             for i in range(num_beaches)) <= total_volunteers
+
+lp_problem += pulp.lpSum(beach_volunteers[i]
+                         for i in range(num_beaches)) <= total_volunteers
 
 print(lp_problem)
 # this will print:
