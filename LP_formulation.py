@@ -56,9 +56,10 @@ for feature_name in df.columns:
     if feature_name != NAME:
         max_value = df[feature_name].max()
         min_value = df[feature_name].min()
-        normalized_df[feature_name] = (df[feature_name])/(max_value)
+        normalized_df[feature_name] = (
+            df[feature_name]-min_value)/(max_value-min_value)
 
-r = r/(df[G].max())
+normalized_r = r/(df[G].max())
 
 # each entry in dataframe
 for index, b in normalized_df.iterrows():
@@ -82,17 +83,18 @@ cs = 0.10  # safety
 cp = 0.70  # population
 
 lp_problem += pulp.lpSum(
-    (cv*r*beach_volunteers[i]    # cv*r*v_i
-     + cw*beach_dict[i].get_w()  # cw*w_i
-     + cs*beach_dict[i].get_s()  # cs*s_i
-     + cp*beach_dict[i].get_p()  # cp*p_i
+    (beach_volunteers[i] *
+     (cv*normalized_r             # cv*normalized_r
+      + cw*beach_dict[i].get_w()  # cw*w_i
+      + cs*beach_dict[i].get_s()  # cs*s_i
+      + cp*beach_dict[i].get_p())  # cp*p_i
      )
     for i in range(num_beaches)), "Pollution Cleanup"
 
 # Constraints
 for i in range(num_beaches):
-    # r*v_i <= g_i
-    lp_problem += r*beach_volunteers[i] <= beach_dict[i].get_g()
+    # r*v_i <= g_i (unnormalized)
+    lp_problem += r*beach_volunteers[i] <= df.at[i, G]
 
 lp_problem += pulp.lpSum(beach_volunteers[i]
                          for i in range(num_beaches)) <= total_volunteers
