@@ -44,6 +44,7 @@ total_volunteers = 10  # total number of volunteers who have signed up
 # structures to store the input
 beach_dict = {}
 beach_volunteers = []
+beach_indicators = []
 # Instantiate the problem class
 lp_problem = pulp.LpProblem(
     "Pollution_Cleanup_Maximizing_Problem", pulp.LpMaximize)
@@ -67,11 +68,14 @@ for index, b in normalized_df.iterrows():
     beach_obj = Beach(b[NAME], b[G], b[W], b[S], b[P])
     # add it to the dictionary
     beach_dict[index] = beach_obj
-    # create an lp variable
+    # create lp variables
     var_id = 'volunteers_' + str(index)
-    x = pulp.LpVariable(var_id, lowBound=0, cat='Integer')
+    v = pulp.LpVariable(var_id, lowBound=0, cat='Integer')
+    var_id = 'indicator_' + str(index)
+    I = pulp.LpVariable(var_id, lowBound=0, upBound=1, cat='Integer')
     # add it to the list of variables
-    beach_volunteers.append(x)
+    beach_volunteers.append(v)
+    beach_indicators.append(I)
 
 num_beaches = len(beach_dict)
 
@@ -82,20 +86,41 @@ cw = 0.10  # wildlife
 cs = 0.10  # safety
 cp = 0.70  # population
 
+# SUMi : vi(cv * r  +  cw * wi)  + Ii(cs * si  + cp * pi) + (1 - Ii)
+
 lp_problem += pulp.lpSum(
-    (beach_volunteers[i] *
-     (cv*normalized_r             # cv*normalized_r
-      + cw*beach_dict[i].get_w()  # cw*w_i
-      + cs*beach_dict[i].get_s()  # cs*s_i
-      + cp*beach_dict[i].get_p())  # cp*p_i
-     )
-    for i in range(num_beaches)), "Pollution Cleanup"
+    (
+        beach_volunteers[i] *
+        (
+            cv*normalized_r +
+            cw*beach_dict[i].get_w()
+        )
+
+        +
+
+        beach_indicators[i] *
+        (
+            cs*beach_dict[i].get_s() +
+            cp*beach_dict[i].get_p()
+        )
+
+        +
+
+        (1 - beach_indicators[i])
+    )
+    for i in range(num_beaches)
+), "Pollution Cleanup"
 
 # Constraints
 for i in range(num_beaches):
     # r*v_i <= g_i (unnormalized)
     lp_problem += r*beach_volunteers[i] <= df.at[i, G]
 
+    # vi <= (total_volunteers + 1) * Ii
+    lp_problem += beach_volunteers[i] <= (total_volunteers + 1) * \
+        (beach_indicators[i])
+
+# SUMi vi <= total_volunteers
 lp_problem += pulp.lpSum(beach_volunteers[i]
                          for i in range(num_beaches)) <= total_volunteers
 
