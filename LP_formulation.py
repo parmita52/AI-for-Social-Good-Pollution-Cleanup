@@ -39,7 +39,7 @@ class Beach:
 r = 12305.56
 # minimum number of volunteers at a beach
 min_x = 2
-total_volunteers = 10  # total number of volunteers who have signed up
+total_volunteers = 8267  # total number of volunteers who have signed up
 
 # structures to store the input
 beach_dict = {}
@@ -50,7 +50,7 @@ lp_problem = pulp.LpProblem(
     "Pollution_Cleanup_Maximizing_Problem", pulp.LpMaximize)
 
 # load data into dataframe
-df = pd.read_csv('data/test.csv', sep=",")
+df = pd.read_csv('data/California Case Study.csv', sep=",")
 
 normalized_df = df.copy()
 for feature_name in df.columns:
@@ -81,12 +81,12 @@ num_beaches = len(beach_dict)
 
 # Objective function
 # weights
-cv = 0.10  # pollution cleaned
-cw = 0.10  # wildlife
-cs = 0.10  # safety
-cp = 0.70  # population
+cv = 1  # pollution cleaned
+cw = 0  # wildlife
+cs = 0  # safety
+cp = 0  # population
 
-# SUMi : vi(cv * r  +  cw * wi)  + Ii(cs * si  + cp * pi) + (1 - Ii)
+# SUMi : vi(cv * r  +  cw * wi)  + Ii(cs * si  + cp * pi) + (0 - Ii)
 
 lp_problem += pulp.lpSum(
     (
@@ -106,7 +106,7 @@ lp_problem += pulp.lpSum(
 
         +
 
-        (1 - beach_indicators[i])
+        (0 - 1*beach_indicators[i])
     )
     for i in range(num_beaches)
 ), "Pollution Cleanup"
@@ -116,8 +116,8 @@ for i in range(num_beaches):
     # r*v_i <= g_i (unnormalized)
     lp_problem += r*beach_volunteers[i] <= df.at[i, G]
 
-    # vi <= (total_volunteers + 1) * Ii
-    lp_problem += beach_volunteers[i] <= (total_volunteers + 1) * \
+    # vi <= (total_volunteers) * Ii
+    lp_problem += beach_volunteers[i] <= (total_volunteers) * \
         (beach_indicators[i])
 
 # SUMi vi <= total_volunteers
@@ -149,8 +149,14 @@ Undefined: The optimal solution may exist but may not have been found.
 '''
 
 # print the variable assignemnts
+sum = 0
 for variable in lp_problem.variables():
     print("{} = {}".format(variable.name, variable.varValue))
+    if "volunteer" in (variable.name):
+        sum += variable.varValue
 
 # print the objective
 print(pulp.value(lp_problem.objective))
+
+# print sum of volunteers
+print(sum)
